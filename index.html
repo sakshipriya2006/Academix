@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academix | Role-Based AEC Academic Portal</title>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { margin: 0; background: #0f172a; color: #f8fafc; padding: 24px; }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 16px; margin-bottom: 24px; }
+  .header h1 { margin: 0; font-size: 24px; color: #38bdf8; }
+  .badge { background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; padding: 6px 12px; border-radius: 999px; font-size: 13px; }
+  .auth-box { max-width: 440px; margin: 40px auto; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .tab.active { background: #0284c7; color: white; border-color: #0284c7; }
+  .grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 24px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+  .card h2 { margin-top: 0; font-size: 18px; color: #e2e8f0; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-card h3 { margin: 0; font-size: 22px; color: #38bdf8; }
+  .stat-card p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  input, select { width: 100%; padding: 8px 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #f8fafc; font-size: 14px; margin-bottom: 8px; }
+  .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; margin-top: 6px; }
+  .btn-primary { background: #0284c7; color: white; }
+  .btn-warn { background: #d97706; color: white; }
+  .btn-stress { background: #7c3aed; color: white; }
+  .btn-del { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .btn-logout { background: #334155; color: #f8fafc; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
+  th { color: #94a3b8; }
+  .pill { padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+  .SAFE { background: #065f46; color: #6ee7b7; }
+  .MODERATE { background: #78350f; color: #fcd34d; }
+  .HIGH { background: #7f1d1d; color: #fca5a5; }
+  .terminal { background: #020617; color: #22c55e; font-family: 'Consolas', monospace; padding: 14px; border-radius: 8px; border: 1px solid #334155; margin-top: 16px; min-height: 90px; font-size: 13px; white-space: pre-wrap; }
+  .hidden { display: none; }
+  @media (max-width: 900px) { .grid, .stats { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>ACADEMIX — Asansol Engineering College (AEC)</h1>
+    <small style="color:#94a3b8;">Role-Based C Management System (Binary File Storage: students.dat & users.dat)</small>
+  </div>
+  <div>
+    <span class="badge" id="roleBadge">Not Logged In</span>
+    <button class="btn-logout hidden" id="logoutBtn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div id="authSection" class="auth-box">
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="switchAuth('login')">1. User / Admin Login</button>
+    <button class="tab" id="tabReg" onclick="switchAuth('reg')">2. New Registration</button>
+  </div>
+
+  <div id="loginForm">
+    <label>User ID / Roll Number (Default Admin: <b>admin</b>)</label>
+    <input id="loginId" placeholder="Enter ID or Roll No">
+    <label>Password (Default Admin: <b>admin123</b>)</label>
+    <input id="loginPass" type="password" placeholder="Enter Password">
+    <button class="btn btn-primary" onclick="doLogin()">Login to Dashboard</button>
+  </div>
+
+  <div id="regForm" class="hidden">
+    <label>New User ID / Roll Number (e.g. AEC/CSE/25/01)</label>
+    <input id="regId" placeholder="Enter Roll No or ID">
+    <label>Create Password (min 3 chars)</label>
+    <input id="regPass" type="password" placeholder="Create Password">
+    <label>Account Role</label>
+    <select id="regRole">
+      <option value="USER">Student (User Access)</option>
+      <option value="ADMIN">Faculty / Admin Access</option>
+    </select>
+    <button class="btn btn-primary" onclick="doRegister()">Register Account</button>
+  </div>
+  <p id="authMsg" style="color:#fca5a5; font-size:13px; margin-top:10px;"></p>
+</div>
+<div id="adminSection" class="hidden">
+  <div class="stats">
+    <div class="stat-card"><h3 id="stTotal">0</h3><p>Total Students</p></div>
+    <div class="stat-card"><h3 id="stAvg">0.00</h3><p>Average SGPA</p></div>
+    <div class="stat-card"><h3 id="stSafe" style="color:#6ee7b7;">0</h3><p>Safe Standing</p></div>
+    <div class="stat-card"><h3 id="stRisk" style="color:#fca5a5;">0</h3><p>High Risk Alerts</p></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Admin Menu: Add / Update Student</h2>
+      <div class="form-row">
+        <div><label>Roll Number</label><input id="roll" placeholder="e.g. AEC/CSE/25/01"></div>
+        <div><label>Student Name</label><input id="name" placeholder="Full Name"></div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Department</label>
+          <select id="dept"><option>CSE</option><option>IT</option><option>ECE</option><option>EE</option><option>ME</option></select>
+        </div>
+        <div><label>Attendance (0-100%)</label><input id="att" type="number" step="0.1" value="84.5"></div>
+      </div>
+
+      <label style="color:#38bdf8;">CIE Marks (0 - 30 each)</label>
+      <div class="form-row-3">
+        <div><label>CIE 1</label><input id="c1" type="number" value="24"></div>
+        <div><label>CIE 2</label><input id="c2" type="number" value="22"></div>
+        <div><label>CIE 3</label><input id="c3" type="number" value="25"></div>
+      </div>
+
+      <label style="color:#38bdf8;">Semester Subject Marks (0 - 100 each)</label>
+      <div class="form-row-3">
+        <div><label>Sub 1 (4 Cr)</label><input id="m1" type="number" value="82"></div>
+        <div><label>Sub 2 (4 Cr)</label><input id="m2" type="number" value="76"></div>
+        <div><label>Sub 3 (3 Cr)</label><input id="m3" type="number" value="88"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Sub 4 (3 Cr)</label><input id="m4" type="number" value="79"></div>
+        <div><label>Sub 5 (2 Cr)</label><input id="m5" type="number" value="91"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitStudent(0)">1. Add New Student Record</button>
+      <button class="btn btn-warn" onclick="submitStudent(1)">2. Update Existing Student Record</button>
+      <button class="btn btn-stress" onclick="runStressTest()">3. Run 10,000-Record C Benchmark</button>
+
+      <div class="terminal" id="term">[ADMIN CONSOLE] Authenticated. Binary file storage active.</div>
+    </div>
+
+    <div class="card">
+      <h2>4. All Student Records & Risk Report (students.dat)</h2>
+      <table>
+        <thead>
+          <tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Att %</th><th>CIE</th><th>SGPA</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="userSection" class="hidden">
+  <div class="card" style="max-width:650px; margin:0 auto;">
+    <h2>Student Personal Academic Report (Read-Only Access)</h2>
+    <div id="userReportBox" style="line-height:1.8; font-size:15px;">Loading your record...</div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+
+function switchAuth(mode) {
+  document.getElementById('authMsg').textContent = '';
+  document.getElementById('loginForm').classList.toggle('hidden', mode !== 'login');
+  document.getElementById('regForm').classList.toggle('hidden', mode !== 'reg');
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabReg').classList.toggle('active', mode === 'reg');
+}
+
+async function doRegister() {
+  const id = document.getElementById('regId').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+  const role = document.getElementById('regRole').value;
+  const res = await fetch('/api/register?id=' + encodeURIComponent(id) + '&pass=' + encodeURIComponent(pass) + '&role=' + role);
+  const out = await res.json();
+  if (out.ok) {
+    document.getElementById('authMsg').style.color = '#6ee7b7';
+    document.getElementById('authMsg').textContent = 'Registration saved to users.dat! You can now log in.';
+    switchAuth('login');
+  } else {
+    document.getElementById('authMsg').style.color = '#fca5a5';
+    document.getElementById('authMsg').textContent = out.error;
+  }
+}
+
+async function doLogin() {
+  const id = document.getElementById('loginId').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const res = await fetch('/api/login?id=' + encodeURIComponent(id) + '&pass=' + encodeURIComponent(pass));
+  const out = await res.json();
+  if (!out.ok) {
+    document.getElementById('authMsg').textContent = 'Invalid ID or Password.';
+    return;
+  }
+  currentUser = { id, role: out.role };
+  document.getElementById('authSection').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('roleBadge').textContent = out.role + ':' + id;
+
+  if (out.role === 'ADMIN') {
+    document.getElementById('adminSection').classList.remove('hidden');
+    loadAdminData();
+  } else {
+    document.getElementById('userSection').classList.remove('hidden');
+    loadUserReport(id);
+  }
+}
+
+function logout() {
+  location.reload();
+}
+
+function logTerm(msg) {
+  const t = document.getElementById('term');
+  t.textContent += '\n> ' + msg;
+  t.scrollTop = t.scrollHeight;
+}
+
+async function loadAdminData() {
+  const [stRes, repRes] = await Promise.all([fetch('/api/students'), fetch('/api/report')]);
+  const data = await stRes.json();
+  const rep = await repRes.json();
+
+  document.getElementById('stTotal').textContent = rep.total;
+  document.getElementById('stAvg').textContent = rep.avg_sgpa.toFixed(2);
+  document.getElementById('stSafe').textContent = rep.safe;
+  document.getElementById('stRisk').textContent = rep.high_risk;
+
+  const tbody = document.getElementById('tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="color:#94a3b8; text-align:center;">No records in students.dat yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const cls = s.status.startsWith('HIGH') ? 'HIGH' : s.status;
+    return '<tr>' +
+      '<td><b>' + s.roll + '</b></td><td>' + s.name + '</td><td>' + s.dept + '</td>' +
+      '<td>' + s.attendance.toFixed(1) + '%</td><td>' + s.cie_avg.toFixed(2) +'</td>' +
+      '<td><b>' + s.sgpa.toFixed(2) + '</b></td><td><span class="pill ' + cls + '">' + s.status + '</span></td>' +
+      '<td><button class="btn-del" onclick="delStudent(\'' + s.roll + '\')">Delete</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function loadUserReport(roll) {
+  const res = await fetch('/api/myrecord?roll=' + encodeURIComponent(roll));
+  const s = await res.json();
+  const box = document.getElementById('userReportBox');
+  if (!s.found) {
+    box.innerHTML = '<p style="color:#fcd34d;">No academic record found for Roll Number <b>' + roll + '</b> yet. Ask Admin to add your marks.</p>';
+    return;
+  }
+  const cls = s.status.startsWith('HIGH') ? 'HIGH' : s.status;
+  box.innerHTML = 
+    '<p><b>Roll Number:</b> ' + s.roll + '</p>' +
+    '<p><b>Student Name:</b> ' + s.name + '</p>' +
+    '<p><b>Department:</b> ' + s.dept + '</p>' + 
+    '<p><b>Attendance:</b> ' + s.attendance.toFixed(1) + '%</p>' +
+    '<p><b>CIE Average (out of 30):</b> ' + s.cie_avg.toFixed(2) + '</p>' +
+    '<p><b>Calculated SGPA:</b> <span style="font-size:20px; color:#38bdf8;"><b>' + s.sgpa.toFixed(2) + '</b></span></p>' +
+    '<p><b>Academic Risk Standing:</b> <span class="pill ' + cls + '">' + s.status + '</span></p>'
+  ;
+}
+
+async function submitStudent(isUpdate) {
+  const payload = new URLSearchParams({
+    update: isUpdate,
+    roll: document.getElementById('roll').value.trim(),
+    name: document.getElementById('name').value.trim(),
+    dept: document.getElementById('dept').value,
+    att: document.getElementById('att').value,
+    c1: document.getElementById('c1').value,
+    c2: document.getElementById('c2').value,
+    c3: document.getElementById('c3').value,
+    m1: document.getElementById('m1').value,
+    m2: document.getElementById('m2').value,
+    m3: document.getElementById('m3').value,
+    m4: document.getElementById('m4').value,
+    m5: document.getElementById('m5').value
+  });
+  const res = await fetch('/api/save?' + payload.toString());
+  const out = await res.json();
+  if (!out.ok) {
+    logTerm('ERROR: ' + out.error);
+    alert(out.error);
+    return;
+  }
+  logTerm('Saved ' + payload.get('roll') + ' to students.dat | SGPA=' + out.sgpa + '| Status=' + out.status);
+  loadAdminData();
+}
+
+async function delStudent(roll) {
+  await fetch('/api/delete?roll=' + encodeURIComponent(roll));
+  logTerm('Deleted ' + roll + ' from students.dat.');
+  loadAdminData();
+}
+
+async function runStressTest() {
+  logTerm('Running 10,000 SGPA & Risk evaluations in C...');
+  const res = await fetch('/api/stress');
+  const out = await res.json();
+  logTerm('BENCHMARK COMPLETE: Processed ' + out.records_processed + ' records in ' + out.time_ms + 'ms!');
+}
+</script>
+</body>
+</html>
